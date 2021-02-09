@@ -30,12 +30,22 @@ pub struct Codegen {
     rust_protobuf: bool,
     /// Customize rust-protobuf codegen
     rust_protobuf_customize: protoc_rust::Customize,
+    /// Extra `protoc` args
+    extra_args: Vec<OsString>,
 }
 
 impl Codegen {
     /// Create new codegen object.
     pub fn new() -> Codegen {
         Default::default()
+    }
+
+    /// Extra command line flags for `protoc` invocation.
+    ///
+    /// For example, `--experimental_allow_proto3_optional` option.
+    pub fn extra_arg(&mut self, arg: impl Into<OsString>) -> &mut Self {
+        self.extra_args.push(arg.into());
+        self
     }
 
     /// Set `--LANG_out=...` param
@@ -103,6 +113,7 @@ impl Codegen {
             protoc_rust::Codegen::new()
                 .out_dir(&self.out_dir)
                 .includes(&self.includes)
+                .extra_args(self.extra_args.iter())
                 .inputs(&self.inputs)
                 .customize(self.rust_protobuf_customize.clone())
                 .run()?;
